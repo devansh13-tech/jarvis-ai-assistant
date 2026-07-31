@@ -1,5 +1,9 @@
 import pyttsx3
 import datetime
+import sounddevice as sd
+import soundfile as sf
+import numpy as np
+
 
 
 def speak(text):
@@ -46,3 +50,25 @@ def start_Jarvis():
 
 
 start_Jarvis()
+
+def record_audio(seconds, filename):
+    print("Recording audio...")
+    sample_rate = 44100
+
+    audio = sd.rec(
+        seconds * sample_rate,
+        samplerate = sample_rate,
+        channels = 1,
+        dtype = "float32"
+    )
+    sd.wait()
+
+    sf.write(filename, audio, sample_rate)
+
+    print("Recording is saved successfully.")
+
+record_audio(5, "output.wav")
+
+
+
+
