@@ -10,3 +10,6 @@ __pycache__/
 
 # Environment variables
 .env
+
+# Generated audio files
+output.wav
