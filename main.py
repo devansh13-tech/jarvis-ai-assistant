@@ -3,6 +3,12 @@ import datetime
 import sounddevice as sd
 import soundfile as sf
 import numpy as np
+from faster_whisper import WhisperModel
+
+model = WhisperModel("base",
+                     device="cpu",
+                     compute_type="int8"
+                     )
 
 
 
@@ -69,6 +75,20 @@ def record_audio(seconds, filename):
 
 record_audio(5, "output.wav")
 
+
+def transcribe_audio(filename):
+    print("Transcribing audio.......")
+    segments, info = model.transcribe(filename)
+
+    text = ""
+
+    for segment in segments:
+        text += segment.text
+
+    return text.strip()
+
+text = transcribe_audio("output.wav")
+print(text)
 
 
 
