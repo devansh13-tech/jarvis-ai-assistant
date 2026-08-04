@@ -2,14 +2,14 @@ import pyttsx3
 import datetime
 import sounddevice as sd
 import soundfile as sf
-import numpy as np
 from faster_whisper import WhisperModel
 
-model = WhisperModel("base",
-                     device="cpu",
-                     compute_type="int8"
-                     )
 
+model = WhisperModel(
+    "base",
+    device="cpu",
+    compute_type="int8"
+)
 
 
 def speak(text):
@@ -42,53 +42,71 @@ def wish():
         speak("Good Night.")
 
 
-def start_Jarvis():
-
+def start_jarvis():
     speak("Starting Jarvis.")
-
     wish()
-
-    speak("I am Jarvis.")
-
     speak("How can I help you?")
 
-    speak("I am ready.")
-
-
-start_Jarvis()
 
 def record_audio(seconds, filename):
-    print("Recording audio...")
-    sample_rate = 44100
+    try:
+        print("🎤 Recording... Speak now!")
 
-    audio = sd.rec(
-        seconds * sample_rate,
-        samplerate = sample_rate,
-        channels = 1,
-        dtype = "float32"
-    )
-    sd.wait()
+        sample_rate = 44100
 
-    sf.write(filename, audio, sample_rate)
+        audio = sd.rec(
+            seconds * sample_rate,
+            samplerate=sample_rate,
+            channels=1,
+            dtype="float32"
+        )
 
-    print("Recording is saved successfully.")
+        sd.wait()
 
-record_audio(5, "output.wav")
+        sf.write(filename, audio, sample_rate)
+
+        print("✅ Recording finished.")
+
+    except Exception as error:
+        print("❌ Recording failed.")
+        print(error)
 
 
 def transcribe_audio(filename):
-    print("Transcribing audio.......")
-    segments, info = model.transcribe(filename)
+    try:
+        print(" Transcribing audio...")
 
-    text = ""
+        segments, info = model.transcribe(filename)
 
-    for segment in segments:
-        text += segment.text
+        text = ""
 
-    return text.strip()
+        for segment in segments:
+            text += segment.text
 
-text = transcribe_audio("output.wav")
-print(text)
+        return text.strip()
 
+    except Exception as error:
+        print(" Transcription failed.")
+        print(error)
+        return ""
 
+def listen():
+    record_audio(5, "output.wav")
 
+    text = transcribe_audio("output.wav")
+
+    return text
+
+start_jarvis()
+
+while True:
+    text = listen()
+
+    print("\nYou said:")
+    print(text)
+
+    if "hey, jarvis" in text.lower():
+                speak("Yes?")
+                break
+
+    
