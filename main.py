@@ -100,13 +100,24 @@ def listen():
 start_jarvis()
 
 while True:
-    text = listen()
+    wake_word = listen()
 
     print("\nYou said:")
-    print(text)
+    print(repr(wake_word))
+    print(wake_word.lower())
 
-    if "hey, jarvis" in text.lower():
-                speak("Yes?")
-                break
+    print("Checking wake word...")
+
+    if "hey jarvis" in wake_word.lower():
+        print("Wake word detected!")
+
+        speak("Yes?")
+
+        command = listen()
+
+        command = listen()
+
+        print("Command:")
+        print(command)
 
     
