@@ -91,11 +91,30 @@ def transcribe_audio(filename):
         return ""
 
 def listen():
-    record_audio(5, "output.wav")
+    record_audio(5, "assets/output.wav")
 
-    text = transcribe_audio("output.wav")
+    text = transcribe_audio("assets/output.wav")
 
     return text
+
+
+def process_command(command):
+
+    if "hello" in command.lower():
+        speak("Hello Devansh")
+
+    elif "name" in command.lower():
+        speak("I am Jarvis.")
+
+    elif "how are you" in command.lower():
+        speak("I am fine, Thank you for asking.")
+
+    elif "time" in command.lower():
+        current_time = datetime.datetime.now().strftime("%I:%M %p")
+        speak(f"The current time is {current_time}.")
+
+    else:
+        speak("Sorry, I don't understand that command.")
 
 start_jarvis()
 
@@ -108,16 +127,16 @@ while True:
 
     print("Checking wake word...")
 
-    if "hey jarvis" in wake_word.lower():
+    if "jarvis" in wake_word.lower():
         print("Wake word detected!")
 
-        speak("Yes?")
 
-        command = listen()
+        speak("Yes?")
 
         command = listen()
 
         print("Command:")
         print(command)
 
-    
+        process_command(command)
+
