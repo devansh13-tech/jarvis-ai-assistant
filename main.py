@@ -3,16 +3,16 @@ import datetime
 import sounddevice as sd
 import soundfile as sf
 import webbrowser
+import subprocess
 from faster_whisper import WhisperModel
 
 
-# Load Whisper model
+
 model = WhisperModel(
     "small",
     device="cpu",
     compute_type="int8"
 )
-
 
 def speak(text):
     engine = pyttsx3.init()
@@ -104,11 +104,11 @@ def transcribe_audio(filename):
 def listen():
     record_audio(5, "assets/output.wav")
     text = transcribe_audio("assets/output.wav")
-    return text
+    return text.strip()
 
 
 def process_command(command):
-    command = command.lower()
+    command = command.lower().strip()
 
     if "hello" in command:
         speak("Hello Devansh")
@@ -139,6 +139,39 @@ def process_command(command):
         speak("Opening GitHub.")
         webbrowser.open("https://github.com")
 
+    elif "open notepad" in command:
+        speak("Opening Notepad.")
+        subprocess.Popen("notepad")
+
+    elif "open calculator" in command:
+        speak("Opening Calculator.")
+        subprocess.Popen("calc")
+
+    elif "open explorer" in command or "open file explorer" in command:
+        speak("Opening File Explorer.")
+        subprocess.Popen("explorer")
+
+    elif "open command prompt" in command or "open cmd" in command:
+        speak("Opening Command Prompt.")
+        subprocess.Popen("cmd")
+
+    elif "open paint" in command:
+        speak("Opening Paint.")
+        subprocess.Popen("mspaint")
+
+    elif "open code" in command or "open visual studio code" in command:
+        speak("Opening Visual Studio Code.")
+        subprocess.Popen("code")
+
+    elif "search" in command:
+        query = command.replace("search", "").strip()
+
+        if query == "":
+            speak("What can I search for?")
+        else:
+            speak(f"Searching for {query}.")
+            webbrowser.open(f"https://www.google.com/search?q={query}")
+
     elif "exit" in command or "shutdown" in command:
         speak("Goodbye! Have a great day ahead.")
         return False
@@ -149,19 +182,22 @@ def process_command(command):
     return True
 
 
-# ---------------- MAIN ---------------- #
 
 start_jarvis()
 
 while True:
 
-    wake_word = listen()
+   wake_word = listen()
+
+   if not wake_word:
+    continue
+
+    wake_word = wake_word.lower()
 
     print("\nYou said:")
     print(repr(wake_word))
-    print(wake_word.lower())
-
     print("Checking wake word...")
+    
 
     if "jarvis" in wake_word.lower():
 
@@ -170,6 +206,10 @@ while True:
         speak("Yes?")
 
         command = listen()
+
+    if not command:
+        speak("I didn't catch that.")
+        continue
 
         print("\nCommand:")
         print(command)
