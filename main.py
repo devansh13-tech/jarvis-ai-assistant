@@ -14,6 +14,9 @@ model = WhisperModel(
     compute_type="int8"
 )
 
+AUDIO_FILE = "assets/output.wav"
+RECORD_SECONDS = 5
+
 def speak(text):
     engine = pyttsx3.init()
     print(f"Speaking: {text}")
@@ -102,13 +105,44 @@ def transcribe_audio(filename):
 
 
 def listen():
-    record_audio(5, "assets/output.wav")
-    text = transcribe_audio("assets/output.wav")
+    record_audio(RECORD_SECONDS, AUDIO_FILE)
+    text = transcribe_audio(AUDIO_FILE)
     return text.strip()
 
 
-def process_command(command):
+def clean_command(command):
     command = command.lower().strip()
+
+    command = command.replace(".", "")
+    command = command.replace("?", "")
+    command = command.replace("!", "")
+
+    if command.startswith("please "):
+        command = command.replace("please ", "", 1).strip()
+
+    return command
+
+
+def search_google(query):
+    speak(f"Searching for {query}.")
+    webbrowser.open(f"https://www.google.com/search?q={query}")
+
+
+def open_website(url, name):
+    speak(f"Opening {name}.")
+    webbrowser.open(url)
+
+def open_application(command, name):
+    speak(f"Opening {name}.")
+    subprocess.Popen(command)
+
+def unknown_command(command):
+    speak(f"Sorry, I don't understand the command: {command}.")
+
+
+
+def process_command(command):
+    command = clean_command(command)
 
     if "hello" in command:
         speak("Hello Devansh")
@@ -127,58 +161,80 @@ def process_command(command):
         current_date = datetime.datetime.now().strftime("%B %d, %Y")
         speak(f"Today's date is {current_date}.")
 
-    elif "google" in command:
-        speak("Opening Google.")
-        webbrowser.open("https://www.google.com")
-
-    elif "youtube" in command:
-        speak("Opening YouTube.")
-        webbrowser.open("https://www.youtube.com")
-
-    elif "github" in command:
-        speak("Opening GitHub.")
-        webbrowser.open("https://github.com")
-
-    elif "open notepad" in command:
-        speak("Opening Notepad.")
-        subprocess.Popen("notepad")
-
-    elif "open calculator" in command:
-        speak("Opening Calculator.")
-        subprocess.Popen("calc")
-
-    elif "open explorer" in command or "open file explorer" in command:
-        speak("Opening File Explorer.")
-        subprocess.Popen("explorer")
-
-    elif "open command prompt" in command or "open cmd" in command:
-        speak("Opening Command Prompt.")
-        subprocess.Popen("cmd")
-
-    elif "open paint" in command:
-        speak("Opening Paint.")
-        subprocess.Popen("mspaint")
-
-    elif "open code" in command or "open visual studio code" in command:
-        speak("Opening Visual Studio Code.")
-        subprocess.Popen("code")
-
     elif "search" in command:
-        query = command.replace("search", "").strip()
+            query = command.replace("search", "").strip()
+    
+            if query.startswith("for "):
+                query = query.replace("for ", "", 1).strip()
+    
+            if query == "":
+                speak("What can I search for?")
+            else:
+                search_google(query)
+
+    elif "google" in command:
+        query = command.replace("google", "").strip()
+        query = query.replace("open", "").strip()
 
         if query == "":
-            speak("What can I search for?")
+            open_website("https://www.google.com", "Google")
         else:
-            speak(f"Searching for {query}.")
-            webbrowser.open(f"https://www.google.com/search?q={query}")
+            search_google(query)
 
-    elif "exit" in command or "shutdown" in command:
+    elif "youtube" in command:
+        query = command.replace("youtube", "").strip()
+        query = query.replace("open", "").strip()
+
+        if query == "":
+            open_website("https://www.youtube.com", "YouTube")
+        else:
+            speak(f"Searching YouTube for {query}.")
+            webbrowser.open(
+                f"https://www.youtube.com/results?search_query={query}"
+            )
+
+    elif "github" in command:
+        query = command.replace("github", "").strip()
+        query = query.replace("open", "").strip()
+
+        if query == "":
+            open_website("https://github.com", "GitHub")
+        else:
+            speak(f"Searching GitHub for {query}.")
+            webbrowser.open(
+                f"https://github.com/search?q={query}"
+            )
+
+    elif "open notepad" in command:
+        open_application("notepad", "Notepad")
+
+    elif "open calculator" in command:
+        open_application("calc", "Calculator")
+
+    elif "open explorer" in command or "open file explorer" in command:
+        open_application("explorer", "File Explorer")
+
+    elif "open command prompt" in command or "open cmd" in command:
+        open_application("cmd", "Command Prompt")
+
+    elif "open paint" in command:
+        open_application("mspaint", "Paint")
+
+    elif "open code" in command or "open visual studio code" in command:
+        open_application("code", "Visual Studio Code")
+
+    
+
+
+    elif command in ["exit", "shutdown", "quit", "goodbye"]:
         speak("Goodbye! Have a great day ahead.")
         return False
 
-    else:
-        speak("Sorry, I don't understand that command.")
+    elif "help" in command:
+        speak("I can open websites, search Google, search YouTube, search GitHub, open Windows applications, tell you the time and date, and answer basic questions.")
 
+    else:
+        unknown_command(command)
     return True
 
 
@@ -187,19 +243,18 @@ start_jarvis()
 
 while True:
 
-   wake_word = listen()
+    wake_word = listen()
 
-   if not wake_word:
-    continue
+    if not wake_word:
+        continue
 
     wake_word = wake_word.lower()
 
     print("\nYou said:")
     print(repr(wake_word))
     print("Checking wake word...")
-    
 
-    if "jarvis" in wake_word.lower():
+    if "jarvis" in wake_word:
 
         print("Wake word detected!")
 
@@ -207,9 +262,9 @@ while True:
 
         command = listen()
 
-    if not command:
-        speak("I didn't catch that.")
-        continue
+        if not command:
+            speak("I didn't catch that.")
+            continue
 
         print("\nCommand:")
         print(command)
