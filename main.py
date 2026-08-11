@@ -145,7 +145,7 @@ def process_command(command):
     command = clean_command(command)
 
     if "hello" in command:
-        speak("Hello Devansh")
+       speak("Hello Devansh")
 
     elif "who are you" in command or "your name" in command:
         speak("I am Jarvis, your personal AI assistant.")
