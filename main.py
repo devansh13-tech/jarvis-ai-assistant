@@ -1,10 +1,21 @@
-import pyttsx3
 import datetime
+from click import command
+from click import command
 import sounddevice as sd
 import soundfile as sf
 import webbrowser
 import subprocess
+
 from faster_whisper import WhisperModel
+from commands.general import handle_general_command
+from core.speaker import speak
+
+from commands.web import (
+    search_google,
+    open_website,
+    search_youtube,
+    search_github
+)
 
 
 
@@ -17,12 +28,7 @@ model = WhisperModel(
 AUDIO_FILE = "assets/output.wav"
 RECORD_SECONDS = 5
 
-def speak(text):
-    engine = pyttsx3.init()
-    print(f"Speaking: {text}")
-    engine.say(text)
-    engine.runAndWait()
-    engine.stop()
+
 
 
 def wish():
@@ -123,15 +129,6 @@ def clean_command(command):
     return command
 
 
-def search_google(query):
-    speak(f"Searching for {query}.")
-    webbrowser.open(f"https://www.google.com/search?q={query}")
-
-
-def open_website(url, name):
-    speak(f"Opening {name}.")
-    webbrowser.open(url)
-
 def open_application(command, name):
     speak(f"Opening {name}.")
     subprocess.Popen(command)
@@ -144,22 +141,8 @@ def unknown_command(command):
 def process_command(command):
     command = clean_command(command)
 
-    if "hello" in command:
-       speak("Hello Devansh")
-
-    elif "who are you" in command or "your name" in command:
-        speak("I am Jarvis, your personal AI assistant.")
-
-    elif "how are you" in command:
-        speak("I am fine. Thank you for asking.")
-
-    elif "time" in command:
-        current_time = datetime.datetime.now().strftime("%I:%M %p")
-        speak(f"The current time is {current_time}.")
-
-    elif "date" in command:
-        current_date = datetime.datetime.now().strftime("%B %d, %Y")
-        speak(f"Today's date is {current_date}.")
+    if handle_general_command(command):
+        return True
 
     elif "search" in command:
             query = command.replace("search", "").strip()
@@ -188,10 +171,7 @@ def process_command(command):
         if query == "":
             open_website("https://www.youtube.com", "YouTube")
         else:
-            speak(f"Searching YouTube for {query}.")
-            webbrowser.open(
-                f"https://www.youtube.com/results?search_query={query}"
-            )
+            search_youtube(query)
 
     elif "github" in command:
         query = command.replace("github", "").strip()
@@ -200,10 +180,7 @@ def process_command(command):
         if query == "":
             open_website("https://github.com", "GitHub")
         else:
-            speak(f"Searching GitHub for {query}.")
-            webbrowser.open(
-                f"https://github.com/search?q={query}"
-            )
+            search_github(query)
 
     elif "open notepad" in command:
         open_application("notepad", "Notepad")
