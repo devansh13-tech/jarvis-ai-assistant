@@ -1,21 +1,15 @@
 import datetime
-from click import command
-from click import command
 import sounddevice as sd
 import soundfile as sf
 import webbrowser
-import subprocess
 
 from faster_whisper import WhisperModel
 from commands.general import handle_general_command
 from core.speaker import speak
 
-from commands.web import (
-    search_google,
-    open_website,
-    search_youtube,
-    search_github
-)
+from commands.system import handle_system_command
+
+from commands.web import handle_web_command
 
 
 
@@ -128,11 +122,6 @@ def clean_command(command):
 
     return command
 
-
-def open_application(command, name):
-    speak(f"Opening {name}.")
-    subprocess.Popen(command)
-
 def unknown_command(command):
     speak(f"Sorry, I don't understand the command: {command}.")
 
@@ -141,77 +130,29 @@ def unknown_command(command):
 def process_command(command):
     command = clean_command(command)
 
-    if handle_general_command(command):
-        return True
-
-    elif "search" in command:
-            query = command.replace("search", "").strip()
-    
-            if query.startswith("for "):
-                query = query.replace("for ", "", 1).strip()
-    
-            if query == "":
-                speak("What can I search for?")
-            else:
-                search_google(query)
-
-    elif "google" in command:
-        query = command.replace("google", "").strip()
-        query = query.replace("open", "").strip()
-
-        if query == "":
-            open_website("https://www.google.com", "Google")
-        else:
-            search_google(query)
-
-    elif "youtube" in command:
-        query = command.replace("youtube", "").strip()
-        query = query.replace("open", "").strip()
-
-        if query == "":
-            open_website("https://www.youtube.com", "YouTube")
-        else:
-            search_youtube(query)
-
-    elif "github" in command:
-        query = command.replace("github", "").strip()
-        query = query.replace("open", "").strip()
-
-        if query == "":
-            open_website("https://github.com", "GitHub")
-        else:
-            search_github(query)
-
-    elif "open notepad" in command:
-        open_application("notepad", "Notepad")
-
-    elif "open calculator" in command:
-        open_application("calc", "Calculator")
-
-    elif "open explorer" in command or "open file explorer" in command:
-        open_application("explorer", "File Explorer")
-
-    elif "open command prompt" in command or "open cmd" in command:
-        open_application("cmd", "Command Prompt")
-
-    elif "open paint" in command:
-        open_application("mspaint", "Paint")
-
-    elif "open code" in command or "open visual studio code" in command:
-        open_application("code", "Visual Studio Code")
-
-    
-
-
-    elif command in ["exit", "shutdown", "quit", "goodbye"]:
+    if command in ["exit", "shutdown", "quit", "goodbye"]:
         speak("Goodbye! Have a great day ahead.")
         return False
 
-    elif "help" in command:
-        speak("I can open websites, search Google, search YouTube, search GitHub, open Windows applications, tell you the time and date, and answer basic questions.")
+    if "help" in command:
+        speak(
+            "I can open websites, search Google, search YouTube, "
+            "search GitHub, open Windows applications, tell you "
+            "the time and date, and answer basic questions."
+        )
+        return True
 
-    else:
-        unknown_command(command)
+    handlers = [
+        handle_general_command,
+        handle_system_command,
+        handle_web_command
+    ]
+
+    for handler in handlers:
+        if handler(command):
+            return True
+
+    unknown_command(command)
     return True
 
 
