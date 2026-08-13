@@ -1,7 +1,7 @@
 import datetime
+from dbm import error
 import sounddevice as sd
 import soundfile as sf
-import webbrowser
 
 from faster_whisper import WhisperModel
 from commands.general import handle_general_command
@@ -123,7 +123,8 @@ def clean_command(command):
     return command
 
 def unknown_command(command):
-    speak(f"Sorry, I don't understand the command: {command}.")
+    print(f"❓ Unknown command: {command}")
+    speak("Sorry, I don't understand that command.")
 
 
 
@@ -148,12 +149,19 @@ def process_command(command):
         handle_web_command
     ]
 
-    for handler in handlers:
-        if handler(command):
-            return True
+    try:
+        for handler in handlers:
+            if handler(command):
+                return True
 
-    unknown_command(command)
-    return True
+        unknown_command(command)
+        return True
+
+    except Exception as error:
+        print("❌ Command processing failed.")
+        print(error)
+        speak("Sorry, something went wrong while processing your command.")
+        return True
 
 
 

@@ -3,8 +3,16 @@ from core.speaker import speak
 
 
 def open_application(command, name):
-    speak(f"Opening {name}.")
-    subprocess.Popen(command)
+    try:
+        speak(f"Opening {name}.")
+        subprocess.Popen(command)
+        return True
+
+    except Exception as error:
+        print(f"❌ Failed to open {name}.")
+        print(error)
+        speak(f"Sorry, I couldn't open {name}.")
+        return False
 
 
 def handle_system_command(command):
