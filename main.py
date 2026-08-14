@@ -1,17 +1,23 @@
 import datetime
-from dbm import error
 import sounddevice as sd
 import soundfile as sf
-
 from faster_whisper import WhisperModel
 from commands.general import handle_general_command
 from core.speaker import speak
-
 from commands.system import handle_system_command
-
 from commands.web import handle_web_command
+from core.ai import ask_ai
+from dotenv import load_dotenv
+import os
 
+print("Current folder:", os.getcwd())
+print(".env exists:", os.path.exists(".env"))
 
+load_dotenv()
+
+api_key = os.getenv("AI_API_KEY")
+
+print("API key loaded:", api_key is not None)
 
 model = WhisperModel(
     "small",
@@ -154,8 +160,15 @@ def process_command(command):
             if handler(command):
                 return True
 
-        unknown_command(command)
+        ai_response = ask_ai(command)
+
+        print("\nJarvis AI:")
+        print(ai_response)
+
+        speak(ai_response)
+
         return True
+
 
     except Exception as error:
         print("❌ Command processing failed.")
@@ -163,9 +176,36 @@ def process_command(command):
         speak("Sorry, something went wrong while processing your command.")
         return True
 
+def conversation():
+    print("🧠 Conversation mode started.")
+
+    while True:
+        command = listen()
+
+        if not command:
+            continue
+
+        print("\nCommand received:")
+        print(repr(command))
+
+        command = clean_command(command)
+
+        if "stop" in command:
+            speak("Okay.")
+            break
+
+        if command in ["exit", "shutdown", "quit", "goodbye"]:
+            speak("Goodbye! Have a great day ahead.")
+            return False
+
+        running = process_command(command)
+
+        if not running:
+            return False
 
 
 start_jarvis()
+
 
 while True:
 
@@ -178,6 +218,7 @@ while True:
 
     print("\nYou said:")
     print(repr(wake_word))
+
     print("Checking wake word...")
 
     if "jarvis" in wake_word:
@@ -186,16 +227,9 @@ while True:
 
         speak("Yes?")
 
-        command = listen()
+        print("Starting conversation...")
 
-        if not command:
-            speak("I didn't catch that.")
-            continue
-
-        print("\nCommand:")
-        print(command)
-
-        running = process_command(command)
+        running = conversation()
 
         if not running:
             break
