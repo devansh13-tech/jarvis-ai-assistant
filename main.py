@@ -1,4 +1,5 @@
 import datetime
+from click import command
 import sounddevice as sd
 import soundfile as sf
 from faster_whisper import WhisperModel
@@ -8,6 +9,7 @@ from commands.system import handle_system_command
 from commands.web import handle_web_command
 from core.ai import ask_ai
 from dotenv import load_dotenv
+from core.context import clear_history
 import os
 
 print("Current folder:", os.getcwd())
@@ -132,6 +134,22 @@ def unknown_command(command):
     print(f"❓ Unknown command: {command}")
     speak("Sorry, I don't understand that command.")
 
+def handle_ai_command(command):
+    try:
+        ai_response = ask_ai(command)
+
+        print("\nJarvis AI:")
+
+        speak(ai_response)
+
+        return True
+
+    except Exception as error:
+        print("❌ AI command failed.")
+        print(error)
+        speak("Sorry, I couldn't process that with my AI brain.")
+        return True
+
 
 
 def process_command(command):
@@ -158,17 +176,11 @@ def process_command(command):
     try:
         for handler in handlers:
             if handler(command):
+                print(f"✅ Handled by: {handler.__name__}")
                 return True
 
-        ai_response = ask_ai(command)
-
-        print("\nJarvis AI:")
-        print(ai_response)
-
-        speak(ai_response)
-
-        return True
-
+        print("🤖 No command handler matched. Sending to AI...")
+        return handle_ai_command(command)
 
     except Exception as error:
         print("❌ Command processing failed.")
@@ -192,6 +204,8 @@ def conversation():
 
         if "stop" in command:
             speak("Okay.")
+            clear_history()
+            print("🧹 Conversation history cleared.")
             break
 
         if command in ["exit", "shutdown", "quit", "goodbye"]:
