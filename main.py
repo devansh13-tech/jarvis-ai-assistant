@@ -202,13 +202,13 @@ def conversation():
 
         command = clean_command(command)
 
-        if "stop" in command:
+        if command in ["stop", "stop conversation", "end conversation"]:
             speak("Okay.")
             clear_history()
             print("🧹 Conversation history cleared.")
             break
 
-        if command in ["exit", "shutdown", "quit", "goodbye"]:
+        if any(word in command for word in ["exit", "shutdown", "quit", "goodbye"]):
             speak("Goodbye! Have a great day ahead.")
             return False
 
