@@ -31,6 +31,7 @@ def detect_intent(command):
         "command": command
     }
 
+
 if __name__ == "__main__":
     print(detect_intent("open youtube"))
     print(detect_intent("search for python"))

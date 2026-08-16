@@ -3,6 +3,7 @@ from openai import OpenAI
 from core.context import add_message, get_history
 import os
 
+
 load_dotenv()
 
 api_key = os.getenv("AI_API_KEY")
@@ -29,8 +30,7 @@ def ask_ai(prompt):
                     "If asked about coding, explain clearly and simply. "
                     "Never describe your reasoning or analyze the user's message. "
                     "Just give the final answer."
-)
-                
+                )
             }
         ]
 

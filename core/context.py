@@ -17,6 +17,7 @@ class ConversationContext:
         self.last_command = ""
         self.last_response = ""
 
+
 conversation_history = []
 
 
