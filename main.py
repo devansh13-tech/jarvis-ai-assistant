@@ -150,10 +150,22 @@ def handle_ai_command(command):
         speak("Sorry, I couldn't process that with my AI brain.")
         return True
 
+    
+COMMAND_HANDLERS = [
+    ("General", handle_general_command),
+    ("System", handle_system_command),
+    ("Web", handle_web_command)
+]
+
+def register_handler(name, handler):
+    COMMAND_HANDLERS.append((name, handler))
+
 
 
 def process_command(command):
     command = clean_command(command)
+
+    print(f"🧠 Processing command: {command}")
 
     if command in ["exit", "shutdown", "quit", "goodbye"]:
         speak("Goodbye! Have a great day ahead.")
@@ -167,17 +179,13 @@ def process_command(command):
         )
         return True
 
-    handlers = [
-        handle_general_command,
-        handle_system_command,
-        handle_web_command
-    ]
-
     try:
-        for handler in handlers:
-            if handler(command):
-                print(f"✅ Handled by: {handler.__name__}")
-                return True
+        for name, handler in COMMAND_HANDLERS:
+            print(f"🔍 Trying: {name}")
+
+        if handler(command):
+            print(f"✅ Handled by: {name}")
+            return True
 
         print("🤖 No command handler matched. Sending to AI...")
         return handle_ai_command(command)
