@@ -4,11 +4,13 @@ import sounddevice as sd
 import soundfile as sf
 from faster_whisper import WhisperModel
 from commands.general import handle_general_command
+from core import intent
 from core.speaker import speak
 from commands.system import handle_system_command
 from commands.web import handle_web_command
 from core.ai import ask_ai
 from dotenv import load_dotenv
+from core.intent import detect_intent   
 from core.context import clear_history
 import os
 
@@ -166,6 +168,12 @@ def process_command(command):
     command = clean_command(command)
 
     print(f"🧠 Processing command: {command}")
+
+    intent_data = detect_intent(command)
+
+    intent = intent_data["intent"]
+
+    print(f"🎯 Detected intent: {intent}")
 
     if command in ["exit", "shutdown", "quit", "goodbye"]:
         speak("Goodbye! Have a great day ahead.")
